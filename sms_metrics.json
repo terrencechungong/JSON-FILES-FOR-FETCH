@@ -1,0 +1,23 @@
+{
+  "msg1TotalSent": 0,
+  "msg2TotalSent": 0,
+  "msg3TotalSent": 0,
+  "msg1TotalReplies": 0,
+  "msg2TotalReplies": 0,
+  "msg3TotalReplies": 0,
+  "msg1Booked": 0,
+  "msg2Booked": 0,
+  "msg3Booked": 0,
+  "msg1Positive": 0,
+  "msg2Positive": 0,
+  "msg3Positive": 0,
+  "msg1ReplyRate": 0,
+  "msg2ReplyRate": 0,
+  "msg3ReplyRate": 0,
+  "msg1PositiveReplyRate": 0,
+  "msg2PositiveReplyRate": 0,
+  "msg3PositiveReplyRate": 0,
+  "msg1BookRate": 0,
+  "msg2BookRate": 0,
+  "msg3BookRate": 0
+}
