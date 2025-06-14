@@ -1,170 +1,128 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Cold SMS Metrics Dashboard</title>
-<style>
-  body {
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen,
-      Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
-    background: #f0f2f5;
-    margin: 0;
-    padding: 20px;
-    color: #333;
-  }
-  h1 {
-    text-align: center;
-    margin-bottom: 30px;
-  }
-  .container {
-    max-width: 900px;
-    margin: 0 auto;
-    background: white;
-    border-radius: 8px;
-    padding: 25px 30px;
-    box-shadow: 0 2px 10px rgb(0 0 0 / 0.1);
-  }
-  .metrics-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-    gap: 20px;
-  }
-  .metric-card {
-    background: #e3e9ff;
-    border-radius: 6px;
-    padding: 15px 20px;
-    text-align: center;
-    box-shadow: inset 0 0 5px #a0b8ff;
-  }
-  .metric-card h2 {
-    margin: 0 0 8px 0;
-    font-size: 1rem;
-    color: #4a6cf7;
-  }
-  .metric-value {
-    font-size: 2.4rem;
-    font-weight: 700;
-    color: #1d2b5f;
-  }
-  .loading {
-    text-align: center;
-    font-size: 1.2rem;
-    color: #666;
-    margin-top: 40px;
-  }
-  @media (max-width: 500px) {
-    .metric-value {
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Cold SMS Metrics Dashboard</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: #f9fafb;
+      margin: 0;
+      padding: 20px;
+      color: #1f2937;
+    }
+
+    h1 {
+      text-align: center;
+      margin-bottom: 32px;
+      color: #111827;
       font-size: 1.8rem;
     }
-  }
-</style>
+
+    .container {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 20px;
+      max-width: 1000px;
+      margin: 0 auto;
+    }
+
+    .card {
+      background: #ffffff;
+      border-radius: 12px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+      width: 300px;
+      padding: 20px 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .card h2 {
+      text-align: center;
+      font-size: 1.3rem;
+      margin: 0 0 12px;
+      color: #2563eb;
+    }
+
+    .stat {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.95rem;
+      padding: 6px 0;
+      border-bottom: 1px solid #e5e7eb;
+    }
+
+    .stat:last-child {
+      border-bottom: none;
+    }
+
+    .stat-label {
+      font-weight: 500;
+      color: #4b5563;
+    }
+
+    .stat-value {
+      font-weight: 600;
+      color: #111827;
+    }
+
+    .rate {
+      color: #2563eb;
+    }
+
+    @media (max-width: 640px) {
+      h1 {
+        font-size: 1.5rem;
+      }
+
+      .card {
+        width: 100%;
+        max-width: 90vw;
+      }
+    }
+  </style>
 </head>
 <body>
+
   <h1>Cold SMS Metrics Dashboard</h1>
-  <div class="container" id="metrics-container">
-    <div class="loading">Loading metrics...</div>
-  </div>
+  <div class="container" id="metricsContainer"></div>
 
-<script>
-  async function loadMetrics() {
-    try {
-      const res = await fetch('https://raw.githubusercontent.com/terrencechungong/JSON-FILES-FOR-FETCH/main/sms_metrics.json');
-      if (!res.ok) throw new Error('Failed to fetch metrics');
-      const data = await res.json();
+  <script>
+    const url = 'https://raw.githubusercontent.com/terrencechungong/JSON-FILES-FOR-FETCH/main/sms_metrics.json';
 
-      const container = document.getElementById('metrics-container');
-      container.innerHTML = ''; // Clear loading text
-
-      // Define groups for better layout
-      const groups = [
-        {
-          title: 'Total Sent',
-          keys: ['msg1TotalSent', 'msg2TotalSent', 'msg3TotalSent'],
-          labels: ['Message 1', 'Message 2', 'Message 3'],
-        },
-        {
-          title: 'Total Replies',
-          keys: ['msg1TotalReplies', 'msg2TotalReplies', 'msg3TotalReplies'],
-          labels: ['Message 1', 'Message 2', 'Message 3'],
-        },
-        {
-          title: 'Booked',
-          keys: ['msg1Booked', 'msg2Booked', 'msg3Booked'],
-          labels: ['Message 1', 'Message 2', 'Message 3'],
-        },
-        {
-          title: 'Positive Responses',
-          keys: ['msg1Positive', 'msg2Positive', 'msg3Positive'],
-          labels: ['Message 1', 'Message 2', 'Message 3'],
-        },
-        {
-          title: 'Reply Rates',
-          keys: ['msg1ReplyRate', 'msg2ReplyRate', 'msg3ReplyRate'],
-          labels: ['Message 1', 'Message 2', 'Message 3'],
-          isPercent: true,
-        },
-        {
-          title: 'Positive Reply Rates',
-          keys: ['msg1PositiveReplyRate', 'msg2PositiveReplyRate', 'msg3PositiveReplyRate'],
-          labels: ['Message 1', 'Message 2', 'Message 3'],
-          isPercent: true,
-        },
-        {
-          title: 'Booking Rates',
-          keys: ['msg1BookRate', 'msg2BookRate', 'msg3BookRate'],
-          labels: ['Message 1', 'Message 2', 'Message 3'],
-          isPercent: true,
-        }
-      ];
-
-      groups.forEach(group => {
-        const section = document.createElement('section');
-        const heading = document.createElement('h2');
-        heading.textContent = group.title;
-        heading.style.color = '#2c3e50';
-        heading.style.marginTop = '30px';
-        section.appendChild(heading);
-
-        const grid = document.createElement('div');
-        grid.className = 'metrics-grid';
-
-        group.keys.forEach((key, i) => {
-          const card = document.createElement('div');
-          card.className = 'metric-card';
-
-          const label = document.createElement('h2');
-          label.textContent = group.labels[i];
-          card.appendChild(label);
-
-          const value = document.createElement('div');
-          value.className = 'metric-value';
-
-          let val = data[key];
-          if (group.isPercent) {
-            val = (val * 100).toFixed(1) + '%';
-          } else {
-            val = val.toLocaleString();
-          }
-
-          value.textContent = val;
-          card.appendChild(value);
-
-          grid.appendChild(card);
-        });
-
-        section.appendChild(grid);
-        container.appendChild(section);
-      });
-
-    } catch (err) {
-      const container = document.getElementById('metrics-container');
-      container.innerHTML = `<p style="color:red; text-align:center;">Error loading metrics: ${err.message}</p>`;
-      console.error(err);
+    function formatPercent(num) {
+      return (num * 100).toFixed(1) + '%';
     }
-  }
 
-  loadMetrics();
-</script>
+    fetch(url)
+      .then(res => res.json())
+      .then(data => {
+        const container = document.getElementById('metricsContainer');
+
+        for (let i = 1; i <= 3; i++) {
+          const card = document.createElement('div');
+          card.className = 'card';
+          card.innerHTML = `
+            <h2>Message ${i}</h2>
+            <div class="stat"><span class="stat-label">Total Sent</span><span class="stat-value">${data['msg'+i+'TotalSent']}</span></div>
+            <div class="stat"><span class="stat-label">Total Replies</span><span class="stat-value">${data['msg'+i+'TotalReplies']}</span></div>
+            <div class="stat"><span class="stat-label">Positive Replies</span><span class="stat-value">${data['msg'+i+'Positive']}</span></div>
+            <div class="stat"><span class="stat-label">Booked</span><span class="stat-value">${data['msg'+i+'Booked']}</span></div>
+            <div class="stat"><span class="stat-label">Reply Rate</span><span class="stat-value rate">${formatPercent(data['msg'+i+'ReplyRate'])}</span></div>
+            <div class="stat"><span class="stat-label">Positive Reply Rate</span><span class="stat-value rate">${formatPercent(data['msg'+i+'PositiveReplyRate'])}</span></div>
+            <div class="stat"><span class="stat-label">Booking Rate</span><span class="stat-value rate">${formatPercent(data['msg'+i+'BookRate'])}</span></div>
+          `;
+          container.appendChild(card);
+        }
+      })
+      .catch(err => {
+        console.error('Error loading JSON:', err);
+        document.getElementById('metricsContainer').innerHTML = '<p style="color:red; text-align:center;">Failed to load metrics.</p>';
+      });
+  </script>
+
 </body>
 </html>
